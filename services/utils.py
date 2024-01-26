@@ -1,3 +1,4 @@
+import sys
 from datetime import date
 import datetime
 import pandas_market_calendars as mcal
@@ -15,11 +16,7 @@ def setup_logs():
     logger.propagate = False
     logger.setLevel(logging.CRITICAL)
 
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.DEBUG)
-    logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
-    logger.addHandler(console_handler)
+    logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 
 def get_next_trading_dates(start_date: date, num_dates: int = 5) -> list[date]:

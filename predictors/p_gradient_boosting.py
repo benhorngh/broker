@@ -1,7 +1,7 @@
 from datetime import date
 
 import pandas as pd
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import GradientBoostingRegressor
 
 from services import utils
 from services.datasets import Stock
@@ -9,24 +9,25 @@ from services.utils import get_next_trading_dates
 from predictors.predictor import Predictor
 
 
-class RandomForestPredictor(Predictor):
+class GradientBoostingPredictor(Predictor):
     @classmethod
     def name(cls):
-        return "Random Forest"
+        return "Gradient Boosting"
 
     features = ["day", "month", "year", "day_of_week"]
     target = "price"
 
     def __init__(self, stock: Stock):
-        super(RandomForestPredictor, self).__init__(stock)
+        super(GradientBoostingPredictor, self).__init__(stock)
         date_and_prices = [(d.day, d.price) for d in stock.train]
         df = self.feature_engineering(date_and_prices)
         x_train = df[self.features]
         y_train = df[self.target]
 
-        model = RandomForestRegressor(
-            n_estimators=10, min_samples_split=5, random_state=42
+        model = GradientBoostingRegressor(
+            n_estimators=100, random_state=42, min_samples_split=5
         )
+
         model.fit(x_train, y_train)
 
         self._model = model

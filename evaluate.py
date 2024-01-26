@@ -6,16 +6,12 @@ from typing import Type, Optional
 from pydantic import BaseModel
 
 from predictors.p_ideal import IdealPredictor
-from predictors.p_linear_regression import LinearRegressionPredictor
-from predictors.p_prophet import ProphetPredictor
-from predictors.p_random import RandomPredictor
-from predictors.p_random_forest import RandomForestPredictor
-from predictors.p_random_plan import RandomPlanPredictor
 from predictors.predictor import Predictor
 from services import stock_data, utils
 from prettytable import PrettyTable
 
 from services.datasets import Stock
+from services.strategy import Strategy
 from services.utils import rnd
 
 
@@ -31,6 +27,7 @@ class InvestResult(BaseModel):
     score_icon: Optional[ScoreIcon] = None
     spent: float = 0
     profit: float = 0
+    plan: Strategy
 
     @classmethod
     def calc_profit(cls, results: list[InvestResult]) -> float:
@@ -54,7 +51,7 @@ class InvestResult(BaseModel):
         return sum([points[r.score_icon] for r in results])
 
     @classmethod
-    def calc_percent_score(
+    def update_scores(
         cls, ideal_results: list[InvestResult], predictor_results: list[InvestResult]
     ):
         ideal_results.sort(key=lambda x: x.symbol)
@@ -62,31 +59,24 @@ class InvestResult(BaseModel):
         for ideal, predictor in zip(ideal_results, predictor_results):
             if not ideal.invest:
                 if not predictor.invest:
-                    logging.debug(f"{ideal.symbol} V: skipped")
+                    # skipped as should have
                     predictor.score_icon = ScoreIcon.V
-                if predictor.invest:
-                    logging.debug(
-                        f"{ideal.symbol} X: Should skipped but invested. Lost {rnd(predictor.profit)}"
-                    )
+                elif predictor.invest:
+                    # should have skipped but invested
                     predictor.score_icon = ScoreIcon.X
             else:
                 if not predictor.invest:
-                    logging.debug(f"{ideal.symbol} X: Should invest but skipped")
+                    # Should invest but skipped
                     predictor.score_icon = ScoreIcon.X
-                if predictor.invest and 0 < predictor.profit == ideal.profit:
-                    logging.debug(f"{ideal.symbol} V: Earned {predictor.profit}")
+                elif predictor.invest and 0 < predictor.profit == ideal.profit:
+                    # Invest as should
                     predictor.score_icon = ScoreIcon.V
-                if predictor.invest and 0 < predictor.profit != ideal.profit:
-                    logging.debug(
-                        f"{ideal.symbol} VX: Earned {rnd(predictor.profit)} out of {rnd(ideal.profit)}"
-                    )
+                elif predictor.invest and 0 < predictor.profit != ideal.profit:
+                    # Invest but sell on the wrong day and earned less
                     predictor.score_icon = ScoreIcon.VX
-                if predictor.invest and predictor.profit <= 0:
-                    logging.debug(
-                        f"{ideal.symbol} X: Lost {rnd(predictor.profit)}, could have earned {rnd(ideal.profit)}"
-                    )
+                elif predictor.invest and predictor.profit <= 0:
+                    # invest but lost
                     predictor.score_icon = ScoreIcon.X
-        return cls.calc_profit(predictor_results) / cls.calc_profit(ideal_results) * 100
 
 
 def handle_predictor(
@@ -99,73 +89,36 @@ def handle_predictor(
         sell_price = stock.actual_future_price_at(predictor_plan.sell)
         profit = sell_price - buy_price
         return InvestResult(
-            spent=buy_price, profit=profit, invest=True, symbol=stock.symbol
+            spent=buy_price,
+            profit=profit,
+            invest=True,
+            symbol=stock.symbol,
+            plan=predictor_plan,
         )
     else:
-        return InvestResult(invest=False, symbol=stock.symbol)
+        return InvestResult(invest=False, symbol=stock.symbol, plan=predictor_plan)
 
 
 def evaluate(predictor_cls: Type[Predictor], stocks):
     forecast_length = 5
     logging.debug(f"Evaluating predictor {predictor_cls.name()}")
     ideal_results, predictor_results = [], []
-    for stock in stocks:
-        logging.debug(f"Stock {stock.symbol}:")
+    for i, stock in enumerate(stocks):
+        logging.debug(f"{i}/{len(stocks)} | {stock.symbol}")
         ideal_results.append(handle_predictor(IdealPredictor, stock, forecast_length))
         predictor_results.append(
             handle_predictor(predictor_cls, stock, forecast_length)
         )
-
-    logging.debug(f"\n___________")
-    logging.debug(f"Ideal profit: {rnd(InvestResult.calc_profit(ideal_results))}")
-    logging.debug(
-        f"Predictor profit: {rnd(InvestResult.calc_profit(predictor_results))}"
-    )
-    logging.debug(
-        f"Score {rnd(InvestResult.calc_percent_score(ideal_results, predictor_results))}%"
-    )
+    InvestResult.update_scores(ideal_results, predictor_results)
     return predictor_results
 
 
-def get_stocks(cutoff):
-    return stock_data.get_stocks(cutoff)
-
-
-def main():
-    utils.setup_logs()
-    cutoff = 8
-    predictors_eval = [
-        IdealPredictor,
-        ProphetPredictor,
-        RandomForestPredictor,
-        LinearRegressionPredictor,
-        # RandomPlanPredictor,
-        # RandomPredictor,
-    ]
-    stocks = get_stocks(cutoff)[:5]
-    table = PrettyTable()
-    table.field_names = [
-        "Predictor",
-        *sorted([s.symbol for s in stocks]),
-        "spent",
-        "gross",
-        "loss",
-        "profit",
-        "score",
-    ]
-    rows = []
-    for p in predictors_eval:
-        results = evaluate(p, stocks)
-        results.sort(key=lambda x: x.symbol)
-        rows.append((p, results))
-    ideal, rest = rows[0], rows[1:]
-    table.add_row(get_row(*ideal))
-    rest.sort(key=lambda x: InvestResult.calc_score(x[1]), reverse=True)
-    table.add_rows([get_row(*r) for r in rest])
-    print(table)
-
-
-def get_row(predictor: Type[Predictor], results: list[InvestResult]):
+def get_row(
+    predictor: Type[Predictor],
+    results: list[InvestResult],
+    by_expected_profit: bool = False,
+    by_score: bool = False,
+):
     gross = InvestResult.calc_gross_profit(results)
     loss = InvestResult.calc_loss(results)
     profit = InvestResult.calc_profit(results)
@@ -182,10 +135,15 @@ def get_row(predictor: Type[Predictor], results: list[InvestResult]):
             profit,
             score,
         ]
-
+    if by_score:
+        vals = [res.score_icon.value for res in results]
+    elif by_expected_profit:
+        vals = [res.plan.expected_profit for res in results]
+    else:
+        vals = [res.score_icon.value for res in results]
     return [
         predictor.name(),
-        *[res.score_icon.value for res in results],
+        *vals,
         spent,
         gross,
         loss,
@@ -194,5 +152,57 @@ def get_row(predictor: Type[Predictor], results: list[InvestResult]):
     ]
 
 
-if __name__ == "__main__":
-    main()
+def eval_one_predictor(predictor: Type[Predictor]):
+    utils.setup_logs()
+    cutoff = 5
+    stocks = stock_data.get_stocks(cutoff)[:1]
+    table = PrettyTable()
+    table.field_names = [
+        "Predictor",
+        *sorted([s.symbol for s in stocks]),
+        "spent",
+        "gross",
+        "loss",
+        "profit",
+        "score",
+    ]
+    all_results = []
+    for p in [IdealPredictor, predictor]:
+        results = evaluate(p, stocks)
+        results.sort(key=lambda x: x.symbol)
+        all_results.append(results)
+    ideal_results, predictor_results = all_results
+    table.add_row(get_row(IdealPredictor, ideal_results))
+    table.add_row(get_row(predictor, predictor_results, by_score=True))
+    table.add_row(get_row(predictor, predictor_results, by_expected_profit=True))
+    print("\n\n")
+    print(table)
+
+
+def compare_predictors(predictors: list[Type[Predictor]]):
+    utils.setup_logs()
+    cutoff = 5
+
+    stocks = stock_data.get_stocks(cutoff)[:5]
+    table = PrettyTable()
+    table.field_names = [
+        "Predictor",
+        *sorted([s.symbol for s in stocks]),
+        "spent",
+        "gross",
+        "loss",
+        "profit",
+        "score",
+    ]
+    all_results = []
+    for p in [IdealPredictor, *predictors]:
+        results = evaluate(p, stocks)
+        results.sort(key=lambda x: x.symbol)
+        all_results.append((p, results))
+    ideal_results, predictors_results = all_results[0], all_results[1:]
+
+    table.add_row(get_row(*ideal_results))
+    predictors_results.sort(key=lambda x: InvestResult.calc_score(x[1]), reverse=True)
+    table.add_rows([get_row(*r) for r in predictors_results])
+    print("\n\n")
+    print(table)

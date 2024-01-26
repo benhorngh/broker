@@ -8,7 +8,27 @@ from settings import settings
 
 endpoint = "https://www.alphavantage.co/query"
 
-_symbols = {"ROKU", "SQ", "ZM", "DOCU"}
+SYMBOLS = {
+    "GE",
+    "SLB",
+    "KR",
+    "EOG",
+    "CVS",
+    "ROKU",
+    "SQ",
+    "DOCU",
+    "TWLO",
+    "FIVN",
+    "TTD",
+    "JCI",
+    "DUK",
+    "DAL",
+    "INTC",
+    "MS",
+    "BMY",
+    "NEE",
+}
+# SYMBOLS = {'TWLO', 'FIVN', 'TTD', 'JCI', 'DUK', 'DAL', 'INTC', 'MS', 'BMY', 'NEE'}
 FILE_PATH = os.path.join(os.path.dirname(__file__), "stocks_data_cache.json")
 
 
@@ -42,7 +62,19 @@ def get_worth(symbol: str):
         "symbol": symbol,
         "apikey": settings.config.ALPHAVANTAGE__API_KEY,
     }
-    print(params)
+    raise ValueError()
+    # response = requests.get(endpoint, params=params)
+    # data = response.json()
+    # return data
+
+
+def get_current_price(symbol: str):
+    settings.init()
+    params = {
+        "function": "GLOBAL_QUOTE",
+        "symbol": symbol,
+        "apikey": settings.config.ALPHAVANTAGE__API_KEY,
+    }
     raise ValueError()
     # response = requests.get(endpoint, params=params)
     # data = response.json()
@@ -50,5 +82,6 @@ def get_worth(symbol: str):
 
 
 if __name__ == "__main__":
-    save_stocks(list(_symbols))
-    get_stocks(5)
+    save_stocks(list(SYMBOLS))
+    # get_stocks(5)
+    # print(get_current_price(SYMBOLS.pop()))
