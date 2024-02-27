@@ -6,6 +6,7 @@ import requests
 from services.datasets import Stock, Day
 from settings import settings
 
+_ = requests
 endpoint = "https://www.alphavantage.co/query"
 
 SYMBOLS = {
@@ -28,7 +29,6 @@ SYMBOLS = {
     "BMY",
     "NEE",
 }
-# SYMBOLS = {'TWLO', 'FIVN', 'TTD', 'JCI', 'DUK', 'DAL', 'INTC', 'MS', 'BMY', 'NEE'}
 FILE_PATH = os.path.join(os.path.dirname(__file__), "stocks_data_cache.json")
 
 

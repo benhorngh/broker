@@ -1,18 +1,19 @@
 from __future__ import annotations
+
 import logging
 from enum import Enum
 from typing import Type, Optional
 
+from prettytable import PrettyTable
 from pydantic import BaseModel
 
 from predictors.p_ideal import IdealPredictor
 from predictors.predictor import Predictor
 from services import stock_data, utils
-from prettytable import PrettyTable
-
 from services.datasets import Stock
 from services.strategy import Strategy
 from services.utils import rnd
+from settings import settings
 
 
 class ScoreIcon(str, Enum):
@@ -100,7 +101,7 @@ def handle_predictor(
 
 
 def evaluate(predictor_cls: Type[Predictor], stocks):
-    forecast_length = 5
+    forecast_length = settings.consts.forecast_length
     logging.debug(f"Evaluating predictor {predictor_cls.name()}")
     ideal_results, predictor_results = [], []
     for i, stock in enumerate(stocks):
@@ -155,7 +156,7 @@ def get_row(
 def eval_one_predictor(predictor: Type[Predictor]):
     utils.setup_logs()
     cutoff = 5
-    stocks = stock_data.get_stocks(cutoff)[:1]
+    stocks = stock_data.get_stocks(cutoff)[:5]
     table = PrettyTable()
     table.field_names = [
         "Predictor",

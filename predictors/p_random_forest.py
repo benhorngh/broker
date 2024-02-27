@@ -3,10 +3,10 @@ from datetime import date
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 
+from predictors.predictor import Predictor
 from services import utils
 from services.datasets import Stock
 from services.utils import get_next_trading_dates
-from predictors.predictor import Predictor
 
 
 class RandomForestPredictor(Predictor):

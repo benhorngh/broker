@@ -16,7 +16,7 @@ class Config:
 
 @dataclasses.dataclass
 class Consts:
-    pass
+    forecast_length: int = 5
 
 
 class Settings:
@@ -43,3 +43,4 @@ class Settings:
 
 
 settings = Settings()
+settings.init()

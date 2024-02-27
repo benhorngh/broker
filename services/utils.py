@@ -1,6 +1,7 @@
+import datetime
 import sys
 from datetime import date
-import datetime
+
 import pandas_market_calendars as mcal
 
 US_STOCK_MARKET = "XNYS"

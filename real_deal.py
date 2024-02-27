@@ -5,11 +5,10 @@ from datetime import date, datetime
 from managers.m_predictor import PredictorManager
 from managers.manager import Manager
 from predictors.p_prophet import ProphetPredictor
-from predictors.p_random_forest import RandomForestPredictor
-from settings import settings
 from services import firestore_db, interactive_brokers, stock_data, utils
 from services.datasets import Stock
 from services.firestore_db import firebase_client
+from settings import settings
 
 
 def create_future_actions(stocks: list[Stock], forecast_length: int):
@@ -54,7 +53,7 @@ def real_deal():
     firebase_client.start()
 
     cutoff = 0
-    forecast_length = 5
+    forecast_length = settings.consts.forecast_length
     stocks = stock_data.get_stocks(cutoff)
     next_day = utils.get_next_trading_dates(stocks[0].last_day, 1)[0]
 
