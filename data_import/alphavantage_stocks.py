@@ -3,46 +3,30 @@ import os
 
 import requests
 
+from data_import import symbols
 from services.datasets import Stock, Day
 from settings import settings
 
-_ = requests
+_, _ = requests, symbols
 endpoint = "https://www.alphavantage.co/query"
 
-SYMBOLS = {
-    "GE",
-    "SLB",
-    "KR",
-    "EOG",
-    "CVS",
-    "ROKU",
-    "SQ",
-    "DOCU",
-    "TWLO",
-    "FIVN",
-    "TTD",
-    "JCI",
-    "DUK",
-    "DAL",
-    "INTC",
-    "MS",
-    "BMY",
-    "NEE",
-}
-FILE_PATH = os.path.join(os.path.dirname(__file__), "stocks_data_cache.json")
+
+CACHE_FILE_PATH = os.path.join(
+    os.path.dirname(__file__), ".cache/alphavantage_stocks_data.json"
+)
 
 
-def save_stocks(symbols: list[str]):
+def save_stocks(stocks_symbols: list[str]):
     stocks = {}
-    for symbol in symbols:
+    for symbol in stocks_symbols:
         stocks[symbol] = get_worth(symbol)
 
-    with open(FILE_PATH, "w") as json_file:
+    with open(CACHE_FILE_PATH, "w") as json_file:
         json.dump(stocks, json_file, indent=4)
 
 
 def get_stocks(cutoff: int):
-    with open(FILE_PATH, "r") as json_file:
+    with open(CACHE_FILE_PATH, "r") as json_file:
         loaded_dict = json.load(json_file)
     stocks = []
     for stock_symbol, stock_response in loaded_dict.items():
@@ -63,9 +47,9 @@ def get_worth(symbol: str):
         "apikey": settings.config.ALPHAVANTAGE__API_KEY,
     }
     raise ValueError()
-    # response = requests.get(endpoint, params=params)
-    # data = response.json()
-    # return data
+    response = requests.get(endpoint, params=params)
+    data = response.json()
+    return data
 
 
 def get_current_price(symbol: str):
@@ -76,12 +60,12 @@ def get_current_price(symbol: str):
         "apikey": settings.config.ALPHAVANTAGE__API_KEY,
     }
     raise ValueError()
-    # response = requests.get(endpoint, params=params)
-    # data = response.json()
-    # return data
+    response = requests.get(endpoint, params=params)
+    data = response.json()
+    return data
 
 
 if __name__ == "__main__":
-    save_stocks(list(SYMBOLS))
-    # get_stocks(5)
+    # save_stocks(list(symbols.SYMBOLS)[:10])
+    print(get_stocks(5))
     # print(get_current_price(SYMBOLS.pop()))

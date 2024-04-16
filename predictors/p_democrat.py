@@ -6,15 +6,18 @@ from predictors.p_linear_regression import LinearRegressionPredictor
 from predictors.p_prophet import ProphetPredictor
 from predictors.predictor import Predictor
 from services.datasets import Stock
-from services.firestore_db import ActionType
-from services.strategy import Strategy
+from services.strategy import Strategy, ActionType
 
 
 class DemocratPredictor(Predictor):
     voters_predictors_cls = [
         ProphetPredictor,
+        ProphetPredictor,
+        ProphetPredictor,
         LinearRegressionPredictor,
         AutoTSPredictor,
+        AutoTSPredictor,
+        # RandomPlanPredictor
     ]
 
     @classmethod

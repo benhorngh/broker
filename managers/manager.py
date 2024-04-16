@@ -1,14 +1,14 @@
 import abc
 
 from services.datasets import Stock
-from services.firestore_db import Action
+from services.strategy import Strategy
 
 
 class Manager(abc.ABC):
     def __init__(self, *args, **kwargs):
         pass
 
-    def handle(self, stocks: list[Stock], length: int) -> list[Action]:
+    def handle(self, stocks: list[Stock], length: int) -> dict[str, Strategy]:
         raise NotImplementedError()
 
     def name(self):

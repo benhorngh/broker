@@ -3,8 +3,7 @@ import random
 from predictors.predictor import Predictor
 from services import utils
 from services.datasets import Stock
-from services.firestore_db import ActionType
-from services.strategy import Strategy
+from services.strategy import Strategy, ActionType
 
 
 class RandomPlanPredictor(Predictor):

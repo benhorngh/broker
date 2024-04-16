@@ -7,9 +7,10 @@ from typing import Type, Optional
 from prettytable import PrettyTable
 from pydantic import BaseModel
 
+from data_import import stocks_data
 from predictors.p_ideal import IdealPredictor
 from predictors.predictor import Predictor
-from services import stock_data, utils
+from services import utils
 from services.datasets import Stock
 from services.strategy import Strategy
 from services.utils import rnd
@@ -47,6 +48,10 @@ class InvestResult(BaseModel):
         return rnd(sum([res.spent for res in results]))
 
     @classmethod
+    def calc_profit_percent(cls, results: list[InvestResult]) -> float:
+        return rnd(cls.calc_profit(results) / cls.calc_spent(results) * 100)
+
+    @classmethod
     def calc_score(cls, results: list[InvestResult]) -> float:
         points = {ScoreIcon.V: 1, ScoreIcon.VX: 0.5, ScoreIcon.X: 0}
         return sum([points[r.score_icon] for r in results])
@@ -82,25 +87,29 @@ class InvestResult(BaseModel):
 
 def handle_predictor(
     predictor_cls: Type[Predictor], stock: Stock, forecast_length: int
-):
+) -> InvestResult:
     predictor = predictor_cls(stock)
     predictor_plan = predictor.plan(forecast_length)
-    if not predictor_plan.skip:
-        buy_price = stock.actual_future_price_at(predictor_plan.buy)
-        sell_price = stock.actual_future_price_at(predictor_plan.sell)
+    return apply_plan(stock, predictor_plan)
+
+
+def apply_plan(stock: Stock, plan: Strategy) -> InvestResult:
+    if not plan.skip:
+        buy_price = stock.actual_future_price_at(plan.buy)
+        sell_price = stock.actual_future_price_at(plan.sell)
         profit = sell_price - buy_price
         return InvestResult(
             spent=buy_price,
             profit=profit,
             invest=True,
             symbol=stock.symbol,
-            plan=predictor_plan,
+            plan=plan,
         )
     else:
-        return InvestResult(invest=False, symbol=stock.symbol, plan=predictor_plan)
+        return InvestResult(invest=False, symbol=stock.symbol, plan=plan)
 
 
-def evaluate(predictor_cls: Type[Predictor], stocks):
+def evaluate_predictor(predictor_cls: Type[Predictor], stocks):
     forecast_length = settings.consts.forecast_length
     logging.debug(f"Evaluating predictor {predictor_cls.name()}")
     ideal_results, predictor_results = [], []
@@ -156,7 +165,7 @@ def get_row(
 def eval_one_predictor(predictor: Type[Predictor]):
     utils.setup_logs()
     cutoff = 5
-    stocks = stock_data.get_stocks(cutoff)[:5]
+    stocks = stocks_data.get_stocks(cutoff)[:5]
     table = PrettyTable()
     table.field_names = [
         "Predictor",
@@ -169,7 +178,7 @@ def eval_one_predictor(predictor: Type[Predictor]):
     ]
     all_results = []
     for p in [IdealPredictor, predictor]:
-        results = evaluate(p, stocks)
+        results = evaluate_predictor(p, stocks)
         results.sort(key=lambda x: x.symbol)
         all_results.append(results)
     ideal_results, predictor_results = all_results
@@ -184,7 +193,7 @@ def compare_predictors(predictors: list[Type[Predictor]]):
     utils.setup_logs()
     cutoff = 5
 
-    stocks = stock_data.get_stocks(cutoff)[:5]
+    stocks = stocks_data.get_stocks(cutoff)[3:17]
     table = PrettyTable()
     table.field_names = [
         "Predictor",
@@ -197,7 +206,7 @@ def compare_predictors(predictors: list[Type[Predictor]]):
     ]
     all_results = []
     for p in [IdealPredictor, *predictors]:
-        results = evaluate(p, stocks)
+        results = evaluate_predictor(p, stocks)
         results.sort(key=lambda x: x.symbol)
         all_results.append((p, results))
     ideal_results, predictors_results = all_results[0], all_results[1:]
@@ -207,3 +216,15 @@ def compare_predictors(predictors: list[Type[Predictor]]):
     table.add_rows([get_row(*r) for r in predictors_results])
     print("\n\n")
     print(table)
+    highest_profit = sorted(
+        predictors_results, key=lambda x: InvestResult.calc_profit(x[1]), reverse=True
+    )[0]
+    lowest_loss = sorted(
+        predictors_results, key=lambda x: InvestResult.calc_loss(x[1]), reverse=True
+    )[0]
+    lowest_spend = sorted(
+        predictors_results, key=lambda x: InvestResult.calc_spent(x[1]), reverse=True
+    )[0]
+    print("Highest profit:", highest_profit[0].name())
+    print("Lowest loss:", lowest_loss[0].name())
+    print("Lowest spend:", lowest_spend[0].name())

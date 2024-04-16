@@ -1,12 +1,17 @@
 from datetime import date
+from enum import Enum
 from typing import Optional
 
 from pydantic import BaseModel
 
 from services import utils
 from services.datasets import Stock
-from services.firestore_db import ActionType
 from services.utils import rnd
+
+
+class ActionType(str, Enum):
+    BUY = "buy"
+    SKIP = "skip"
 
 
 class Strategy(BaseModel):

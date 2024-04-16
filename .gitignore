@@ -6,3 +6,4 @@ __pycache__/
 venv/
 stocks_data_cache.json
 sandbox.py
+.cache/
