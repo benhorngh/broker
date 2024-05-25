@@ -49,8 +49,8 @@ def compare_managers(manage_responses: list[ManageResponse]):
                 res.name,
                 res.spent,
                 res.expected_profit,
-                res.actual_profit or "?",
-                res.profit_percent or "?",
+                res.actual_profit,
+                res.profit_percent,
                 res.number_of_stocks,
                 res.ibkr_fee,
             ]

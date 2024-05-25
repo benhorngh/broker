@@ -101,12 +101,16 @@ class ManageResponse(BaseModel):
     @property
     @round_results
     def actual_profit(self) -> Optional[float]:
+        if not self.buy_transactions:
+            return 0
         if self.buy_transactions[0].actual_profit is not None:
             return sum([t.actual_profit for t in self.buy_transactions])
 
     @property
     @round_results
     def profit_percent(self) -> float:
+        if self.spent == 0:
+            return 0
         if self.actual_profit is not None:
             return self.actual_profit / self.spent * 100
 

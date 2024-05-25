@@ -21,9 +21,9 @@ CLOSE_PRICE_COL = "Close"
 
 def save_stocks(stocks_symbols: list[str]):
     today = datetime.today()
-    last_year = today - timedelta(days=365)
+    start_date = today - timedelta(days=365 * 3)
     data = yf.download(
-        stocks_symbols, start=str(last_year.date()), end=str(today.date())
+        stocks_symbols, start=str(start_date.date()), end=str(today.date())
     )
 
     closing_data: pd.DataFrame = data[CLOSE_PRICE_COL]
@@ -39,11 +39,11 @@ def get_current_price(symbol):
 
 
 @lru_cache
-def read_cache_file():
+def read_cache_file() -> pd.DataFrame:
     return pd.read_csv(CACHE_FILE_PATH)
 
 
-def dataframe_to_stocks(df: pd.DataFrame):
+def dataframe_to_stocks(df: pd.DataFrame) -> list[Stock]:
     stocks = []
     for symbol in df.columns:
         if symbol == DATE_COL:
@@ -77,4 +77,4 @@ def get_stocks(symbols: list[str], cutoff_date: date = None) -> list[Stock]:
 if __name__ == "__main__":
     # save_stocks(SYMBOLS)
     print(get_stocks(SYMBOLS, date(year=2024, month=4, day=30))[0].values[-1])
-    print(get_stocks(SYMBOLS, date.today())[0].values[-1])
+    # print(get_stocks(SYMBOLS, date.today())[0].values[-1])
