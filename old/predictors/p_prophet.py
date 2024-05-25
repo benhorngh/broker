@@ -1,10 +1,10 @@
 import pandas as pd
 from prophet import Prophet
 
-from predictors.predictor import Predictor
-from services import utils
-from services.datasets import Stock
-from services.utils import get_next_trading_dates
+from old.predictors.predictor import Predictor
+from old.services import utils
+from old.services.datasets import Stock
+from old.services.utils import get_next_trading_dates
 
 
 class ProphetPredictor(Predictor):

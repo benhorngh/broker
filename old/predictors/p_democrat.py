@@ -1,12 +1,12 @@
 import random
 from collections import Counter
 
-from predictors.p_autots import AutoTSPredictor
-from predictors.p_linear_regression import LinearRegressionPredictor
-from predictors.p_prophet import ProphetPredictor
-from predictors.predictor import Predictor
-from services.datasets import Stock
-from services.strategy import Strategy, ActionType
+from old.predictors.p_autots import AutoTSPredictor
+from old.predictors.p_linear_regression import LinearRegressionPredictor
+from old.predictors.p_prophet import ProphetPredictor
+from old.predictors.predictor import Predictor
+from old.services.datasets import Stock
+from old.services.strategy import Strategy, ActionType
 
 
 class DemocratPredictor(Predictor):

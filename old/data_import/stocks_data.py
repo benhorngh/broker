@@ -1,4 +1,4 @@
-from data_import import yfinance_stocks
+from old.data_import import yfinance_stocks
 
 
 def get_stocks(cutoff: int):

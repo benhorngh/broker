@@ -1,8 +1,8 @@
 import abc
 
-from services import strategy
-from services.datasets import Stock
-from services.strategy import Strategy
+from old.services import strategy
+from old.services.datasets import Stock
+from old.services.strategy import Strategy
 
 
 class Predictor(abc.ABC):

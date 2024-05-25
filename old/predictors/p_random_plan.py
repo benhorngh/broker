@@ -1,9 +1,9 @@
 import random
 
-from predictors.predictor import Predictor
-from services import utils
-from services.datasets import Stock
-from services.strategy import Strategy, ActionType
+from old.predictors.predictor import Predictor
+from old.services import utils
+from old.services.datasets import Stock
+from old.services.strategy import Strategy, ActionType
 
 
 class RandomPlanPredictor(Predictor):

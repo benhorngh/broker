@@ -1,5 +1,5 @@
-from predictors.predictor import Predictor
-from services.datasets import Stock
+from old.predictors.predictor import Predictor
+from old.services.datasets import Stock
 
 
 class IdealPredictor(Predictor):

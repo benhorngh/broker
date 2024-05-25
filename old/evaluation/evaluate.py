@@ -7,13 +7,13 @@ from typing import Type, Optional
 from prettytable import PrettyTable
 from pydantic import BaseModel
 
-from data_import import stocks_data
-from predictors.p_ideal import IdealPredictor
-from predictors.predictor import Predictor
-from services import utils
-from services.datasets import Stock
-from services.strategy import Strategy
-from services.utils import rnd
+from old.data_import import stocks_data
+from old.predictors.p_ideal import IdealPredictor
+from old.predictors.predictor import Predictor
+from old.services import utils
+from old.services.datasets import Stock
+from old.services.strategy import Strategy
+from old.services.utils import rnd
 from settings import settings
 
 

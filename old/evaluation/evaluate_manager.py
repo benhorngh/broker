@@ -1,13 +1,12 @@
 from prettytable import PrettyTable
 
 import evaluate
-from data_import import stocks_data
-from managers.m_predictor import PredictorManager
-from managers.m_top import TopPredictorManager
-from predictors.p_democrat import DemocratPredictor
-from predictors.p_ideal import IdealPredictor
-from predictors.p_prophet import ProphetPredictor
-from services import utils
+from old.data_import import stocks_data
+from old.managers.m_top import TopPredictorManager
+from old.predictors.p_democrat import DemocratPredictor
+from old.predictors.p_ideal import IdealPredictor
+from old.predictors.p_prophet import ProphetPredictor
+from old.services import utils
 from settings import settings
 
 _ = (IdealPredictor, ProphetPredictor, DemocratPredictor)

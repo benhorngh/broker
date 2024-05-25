@@ -1,9 +1,9 @@
 from typing import Type
 
-from managers.manager import Manager
-from predictors.predictor import Predictor
-from services.datasets import Stock
-from services.strategy import Strategy
+from old.managers.manager import Manager
+from old.predictors.predictor import Predictor
+from old.services.datasets import Stock
+from old.services.strategy import Strategy
 
 
 class PredictorManager(Manager):

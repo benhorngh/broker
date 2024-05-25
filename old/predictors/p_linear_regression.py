@@ -1,9 +1,9 @@
 import numpy as np
 from sklearn.linear_model import LinearRegression
 
-from predictors.predictor import Predictor
-from services import utils
-from services.datasets import Stock
+from old.predictors.predictor import Predictor
+from old.services import utils
+from old.services.datasets import Stock
 
 
 class LinearRegressionPredictor(Predictor):

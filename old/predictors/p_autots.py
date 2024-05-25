@@ -1,8 +1,8 @@
 import pandas as pd
 from autots import AutoTS
 
-from predictors.predictor import Predictor
-from services.datasets import Stock
+from old.predictors.predictor import Predictor
+from old.services.datasets import Stock
 from settings import settings
 
 

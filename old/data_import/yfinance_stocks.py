@@ -4,8 +4,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 import yfinance as yf
 
-from services.datasets import Stock, Day
-from data_import.symbols import SYMBOLS
+from old.services.datasets import Stock, Day
 
 CACHE_FILE_PATH = os.path.join(
     os.path.dirname(__file__), ".cache/yfinance_stocks_data.json"

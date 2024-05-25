@@ -1,12 +1,12 @@
 import evaluate
-from predictors.p_autots import AutoTSPredictor
-from predictors.p_democrat import DemocratPredictor
-from predictors.p_gradient_boosting import GradientBoostingPredictor
-from predictors.p_linear_regression import LinearRegressionPredictor
-from predictors.p_prophet import ProphetPredictor
-from predictors.p_random import RandomPredictor
-from predictors.p_random_forest import RandomForestPredictor
-from predictors.p_random_plan import RandomPlanPredictor
+from old.predictors.p_autots import AutoTSPredictor
+from old.predictors.p_democrat import DemocratPredictor
+from old.predictors.p_gradient_boosting import GradientBoostingPredictor
+from old.predictors.p_linear_regression import LinearRegressionPredictor
+from old.predictors.p_prophet import ProphetPredictor
+from old.predictors.p_random import RandomPredictor
+from old.predictors.p_random_forest import RandomForestPredictor
+from old.predictors.p_random_plan import RandomPlanPredictor
 
 
 def evaluate_predictor():

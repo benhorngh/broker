@@ -3,8 +3,8 @@ import os
 
 import requests
 
-from data_import import symbols
-from services.datasets import Stock, Day
+from old.data_import import symbols
+from old.services.datasets import Stock, Day
 from settings import settings
 
 _, _ = requests, symbols

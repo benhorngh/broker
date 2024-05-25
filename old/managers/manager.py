@@ -1,7 +1,7 @@
 import abc
 
-from services.datasets import Stock
-from services.strategy import Strategy
+from old.services.datasets import Stock
+from old.services.strategy import Strategy
 
 
 class Manager(abc.ABC):
